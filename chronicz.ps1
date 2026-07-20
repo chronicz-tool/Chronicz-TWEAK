@@ -1,135 +1,189 @@
-# ==================================================
-#              CHRONICZ TWEAK TOOL
-#          Windows Cleaner & Optimizer
-# ==================================================
+<#
+====================================================
+              CHRONICZ TWEAK TOOL
+          Windows Cleaner & Optimizer
+====================================================
+#>
 
 Clear-Host
 $Host.UI.RawUI.WindowTitle = "Chronicz Tweak Tool"
 
-function Banner {
-    Write-Host ""
-    Write-Host " ██████╗██╗  ██╗██████╗  ██████╗ ███╗   ██╗██╗ ██████╗███████╗" -ForegroundColor Cyan
-    Write-Host "██╔════╝██║  ██║██╔══██╗██╔═══██╗████╗  ██║██║██╔════╝╚══███╔╝" -ForegroundColor Cyan
-    Write-Host "██║     ███████║██████╔╝██║   ██║██╔██╗ ██║██║██║       ███╔╝ " -ForegroundColor Cyan
-    Write-Host "██║     ██╔══██║██╔══██╗██║   ██║██║╚██╗██║██║██║      ███╔╝  " -ForegroundColor Cyan
-    Write-Host "╚██████╗██║  ██║██║  ██║╚██████╔╝██║ ╚████║██║╚██████╗███████╗" -ForegroundColor Cyan
-    Write-Host " ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝ ╚═════╝╚══════╝" -ForegroundColor Cyan
+# Colors
+$Accent = "Cyan"
+$Success = "Green"
+$Warning = "Yellow"
 
-    Write-Host ""
-    Write-Host "        Windows Appearance & Performance Tool" -ForegroundColor DarkGray
-    Write-Host ""
+function Logo {
+
+Write-Host ""
+Write-Host " ██████╗██╗  ██╗██████╗  ██████╗ ███╗   ██╗██╗ ██████╗███████╗" -ForegroundColor Cyan
+Write-Host "██╔════╝██║  ██║██╔══██╗██╔═══██╗████╗  ██║██║██╔════╝╚══███╔╝" -ForegroundColor Cyan
+Write-Host "██║     ███████║██████╔╝██║   ██║██╔██╗ ██║██║██║       ███╔╝ " -ForegroundColor Cyan
+Write-Host "██║     ██╔══██║██╔══██╗██║   ██║██║╚██╗██║██║██║      ███╔╝  " -ForegroundColor Cyan
+Write-Host "╚██████╗██║  ██║██║  ██║╚██████╔╝██║ ╚████║██║╚██████╗███████╗" -ForegroundColor Cyan
+Write-Host " ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝ ╚═════╝╚══════╝" -ForegroundColor Cyan
+
+Write-Host ""
+Write-Host "        Windows Experience Enhancer" -ForegroundColor DarkGray
+Write-Host "              Version 1.0" -ForegroundColor DarkGray
+Write-Host ""
+
 }
 
-function Loading($text) {
-    Write-Host ""
-    Write-Host "[*] $text" -ForegroundColor Yellow
-    Start-Sleep -Milliseconds 500
+function Loading($Text) {
+
+Write-Host ""
+Write-Host "[>] $Text" -ForegroundColor Yellow
+
+for ($i=0;$i -lt 3;$i++) {
+    Write-Host "." -NoNewline -ForegroundColor DarkGray
+    Start-Sleep -Milliseconds 200
 }
 
-function Done($text) {
-    Write-Host "[✓] $text" -ForegroundColor Green
+Write-Host ""
+
+}
+
+function Done($Text) {
+Write-Host "[✓] $Text" -ForegroundColor Green
 }
 
 
-Banner
+Logo
 
 
-# Admin check
+# Admin Check
 
-if (-not ([Security.Principal.WindowsPrincipal]
-[Security.Principal.WindowsIdentity]::GetCurrent()
-).IsInRole(
-[Security.Principal.WindowsBuiltInRole]::Administrator))
-{
-    Write-Host "Please run PowerShell as Administrator." -ForegroundColor Red
-    pause
-    exit
+$User = [Security.Principal.WindowsIdentity]::GetCurrent()
+$Admin = New-Object Security.Principal.WindowsPrincipal($User)
+
+if (!$Admin.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+
+Write-Host ""
+Write-Host "Run Chronicz as Administrator!" -ForegroundColor Red
+Pause
+exit
+
 }
 
+
+# Restore Point
 
 Loading "Creating restore point"
+
+try {
 
 Checkpoint-Computer `
 -Description "Chronicz Backup" `
 -RestorePointType MODIFY_SETTINGS `
--ErrorAction SilentlyContinue
+-ErrorAction Stop
 
 Done "Restore point created"
 
+}
 
-Loading "Applying dark Windows theme"
+catch {
+
+Write-Host "[!] Restore point skipped" -ForegroundColor DarkGray
+
+}
+
+
+
+# Dark Mode
+
+Loading "Applying dark mode"
 
 Set-ItemProperty `
--Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" `
--Name AppsUseLightTheme `
--Value 0
+"HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" `
+AppsUseLightTheme 0
 
 Set-ItemProperty `
--Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" `
--Name SystemUsesLightTheme `
--Value 0
+"HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" `
+SystemUsesLightTheme 0
 
 Done "Dark mode enabled"
 
 
 
+# Taskbar
+
 Loading "Cleaning taskbar"
 
-Set-ItemProperty `
+New-ItemProperty `
 "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
-TaskbarAl 0
+TaskbarAl 0 `
+-Force | Out-Null
 
-Done "Taskbar cleaned"
+Done "Taskbar optimized"
 
 
+
+# Suggestions
 
 Loading "Removing Windows suggestions"
 
-Set-ItemProperty `
+New-ItemProperty `
 "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" `
-SystemPaneSuggestionsEnabled 0
+SystemPaneSuggestionsEnabled 0 `
+-Force | Out-Null
 
-Done "Suggestions disabled"
+Done "Suggestions removed"
 
 
+
+# Explorer
 
 Loading "Improving File Explorer"
 
-Set-ItemProperty `
+New-ItemProperty `
 "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
-HideFileExt 0
+HideFileExt 0 `
+-Force | Out-Null
 
-Done "File extensions enabled"
+New-ItemProperty `
+"HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" `
+LaunchTo 1 `
+-Force | Out-Null
+
+Done "Explorer improved"
 
 
+
+# Lock screen
 
 Loading "Cleaning lock screen"
 
-Set-ItemProperty `
+New-ItemProperty `
 "HKCU:\Software\Microsoft\Windows\CurrentVersion\ContentDeliveryManager" `
-RotatingLockScreenEnabled 0
+RotatingLockScreenEnabled 0 `
+-Force | Out-Null
 
 Done "Lock screen cleaned"
 
 
 
-Loading "Restarting Explorer"
+# Restart Explorer
+
+Loading "Refreshing Windows"
 
 Stop-Process -Name explorer -Force
 Start-Process explorer.exe
 
-Done "Explorer restarted"
+Done "Windows refreshed"
 
 
 
 Write-Host ""
+
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "          CHRONICZ FINISHED" -ForegroundColor Cyan
+Write-Host "          CHRONICZ COMPLETE" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 
 Write-Host ""
-Write-Host "Your Windows interface has been cleaned." -ForegroundColor White
-Write-Host "Restart your PC for the best experience." -ForegroundColor Yellow
+Write-Host "✔ Windows cleaned" -ForegroundColor Green
+Write-Host "✔ Appearance improved" -ForegroundColor Green
+Write-Host "✔ Settings optimized" -ForegroundColor Green
 Write-Host ""
 
-pause
+Pause
